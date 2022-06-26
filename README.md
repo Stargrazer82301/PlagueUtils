@@ -11,7 +11,7 @@ There are optional arguments to change which colour channel is used in the input
 
 An example directory called `CJRC` contains a set of example images, chronicling my own covid experience. You can therefore generate an example of the output plots by running the command:  
 
-`PlagueUtils.Run('CJRC/', green_only=True, debug=True)  `
+`PlagueUtils.Run('CJRC/')  `
  
 The code uses the C (control) line as a "calibration source"; ie, it measures the strength of the T (test) line relative to the control line to estimate the viral load measured by a given test. This should help to account for differences between tests. It also uses crude implementations of various techniques used in analysis of astronomical spectra to, eg, account for the background "continuum" of the test strip.  
 
