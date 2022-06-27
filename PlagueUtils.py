@@ -17,7 +17,8 @@ The function should be given the path to a directory that contains photographs
 of lateral flow tests, cropped to only show the test strip itself, oriented
 such tha that the control line is the uppermost of the two lines (with the
 line itself therefore being horizontal). See the photos provided in this repo
-for illustration.
+for illustration. It also requires that the lines not fall in the top or
+bottom 10% of the image.
 
 The individual photos should be .jpg files (not .jpeg files), and have file
 names of the format NAME_YYYY-MM-DD_HH-MM.jpg, where NAME is the same for
@@ -440,8 +441,6 @@ def Run(test_dir,
         # Plot integrated strength versus time
         fig, ax = plt.subplots(1, 1, figsize=(8,6), constrained_layout=True)
         ax.plot(datetime_array, t_fluxes_int/c_fluxes_int, lw=4)
-        t_fluxes_int_calib = t_fluxes_int / c_fluxes_int
-        t_fluxes_int_unc_calib = t_fluxes_int_unc / c_fluxes_int
         ax.fill_between(datetime_array,
                         t_fluxes_int_calib - t_fluxes_int_unc_calib,
                         t_fluxes_int_calib + t_fluxes_int_unc_calib,
