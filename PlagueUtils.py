@@ -233,6 +233,9 @@ def Run(test_dir,
             raw_spec = copy.deepcopy(test_spec)
             test_spec = test_spec - base_spec
 
+            # Calculate baseline noise level
+            test_unc = np.std(test_spec.flux[base_good])
+
             # Plot this test's processed spectrum
             if debug:
                 fig, ax = plt.subplots(1, 1, figsize=(6,4))
@@ -248,15 +251,20 @@ def Run(test_dir,
 
             # Create a smoothed spectra to use for line extraction
             filt_spec = specutils.manipulation.gaussian_smooth(test_spec, test_img.shape[0]*0.01)
+            filt_reg = specutils.SpectralRegion(10*u.pc, 90*u.pc)
+            filt_spec = specutils.manipulation.extract_region(filt_spec, filt_reg)
 
             # Extract lines from filtered spectrum (computing fresh sigma clip on baseline-subtracted data)
             test_clip = SigmaClip(test_img, median=True, sigma_thresh=2.0)
-            filt_thresh = 2.0 * test_clip[0]
+            filt_thresh = 0.05 * test_clip[0]
             filt_lines = specutils.fitting.find_lines_derivative(filt_spec, flux_threshold=filt_thresh)
 
-            # Only keep 2 strongest lines
-            filt_lines_peaks = [filt_spec[filt_lines['line_center_index'][j]].flux for j in range(len(filt_lines))]
-            filt_lines = filt_lines[np.where(filt_lines_peaks >= np.sort(filt_lines_peaks)[1])[0]]
+            # Only keep 2 strongest "emission" lines
+            filt_lines = filt_lines[filt_lines['line_type'] == 'emission']
+            filt_lines_peaks = [filt_spec[filt_lines['line_center_index'][j]].flux.value[0] for j in range(len(filt_lines))]
+            filt_lines_peaks_sorted = copy.deepcopy(filt_lines_peaks)
+            filt_lines_peaks_sorted.sort()
+            filt_lines = filt_lines[np.where(filt_lines_peaks >= filt_lines_peaks_sorted[-2])[0]]
 
 
 
@@ -268,8 +276,8 @@ def Run(test_dir,
             # Measure peak "flux" in C line region, and estimate uncertinty
             c_flux_peak = c_prospec.max()
             c_flux_peak_list.append(c_flux_peak.value)
-            c_flux_peak_unc = SigmaClip(raw_spec.flux, median=True, sigma_thresh=5.0)[0]
-            c_flux_peak_unc_list.append(c_flux_peak_unc)
+            c_flux_peak_unc = 10.0 * test_unc
+            c_flux_peak_unc_list.append(c_flux_peak_unc.value)
 
             # Fit Gaussian to C line, to roughly estimate line width,
             c_model = astropy.modeling.models.Lorentz1D(amplitude=c_flux_peak,
@@ -284,8 +292,8 @@ def Run(test_dir,
             # Measure integrated flux of C line, and estimate uncertinty
             c_flux_int = specutils.analysis.line_flux(test_spec, regions=c_proreg)
             c_flux_int_list.append(c_flux_int.value)
-            c_flux_int_unc = np.sum(np.abs(np.array(c_prospec.flux.data)))**0.5
-            c_flux_int_unc_list.append(c_flux_int_unc)
+            c_flux_int_unc = test_unc * (len(c_prospec.flux.data))**0.5
+            c_flux_int_unc_list.append(c_flux_int_unc.value)
 
 
 
@@ -296,8 +304,8 @@ def Run(test_dir,
             # Measure peak "flux" in T line region, and estimate uncertinty
             t_flux_peak = t_prospec.max()
             t_flux_peak_list.append(t_flux_peak.value)
-            t_flux_peak_unc = SigmaClip(raw_spec.flux, median=True, sigma_thresh=5.0)[0]
-            t_flux_peak_unc_list.append(t_flux_peak_unc)
+            t_flux_peak_unc = 10.0 * test_unc
+            t_flux_peak_unc_list.append(t_flux_peak_unc.value)
 
             # Fit Gaussian to T line, to roughly estimate line width,
             t_model = astropy.modeling.models.Lorentz1D(amplitude=t_flux_peak,
@@ -312,13 +320,14 @@ def Run(test_dir,
             # Measure integrated flux of T line, and estimate uncertinty
             t_flux_int = specutils.analysis.line_flux(test_spec, regions=t_proreg)
             t_flux_int_list.append(t_flux_int.value)
-            t_flux_int_unc = np.sum(np.abs(np.array(t_prospec.flux.data)))**0.5
-            t_flux_int_unc_list.append(t_flux_int_unc)
+            t_flux_int_unc = test_unc * (len(t_prospec.flux.data))**0.5
+            t_flux_int_unc_list.append(t_flux_int_unc.value)
+
 
 
             # Calibrate spectrum
             pro_spec = copy.deepcopy(test_spec)
-            pro_calib = c_flux_peak.value#(c_flux_int**0.5 * c_flux_peak).value
+            pro_calib = c_flux_peak.value
             pro_spec /= pro_calib
             pro_calib_list.append(pro_calib)
 
@@ -332,7 +341,7 @@ def Run(test_dir,
         # Plot raw spectra
         fig_raw_dims = (int(np.floor(np.sqrt(n_tests)+0.5)), int(np.ceil(np.sqrt(n_tests))))
         fig_raw, axes_raw = plt.subplots(fig_raw_dims[0], fig_raw_dims[1],
-                                         figsize=(fig_raw_dims[0]*7.0, fig_raw_dims[0]*4.0),
+                                         figsize=(fig_raw_dims[0]*5.0, fig_raw_dims[0]*3.5),
                                          constrained_layout=True)
         raw_ypeak = np.concatenate((t_flux_peak_list, c_flux_peak_list)).max()
         for i in range(n_tests):
@@ -348,6 +357,9 @@ def Run(test_dir,
                              0.9,
                              time.strftime('%d %b %Y, %H:%M', test_datetime_list[i].timetuple()),
                              transform=axes_raw.flatten()[i].transAxes)
+        for i in range(len(axes_raw.flatten())):
+            if i > (n_tests - 1):
+                axes_raw.flatten()[i].remove()
         fig_raw.savefig(os.path.join(test_dir, name+'_Spectra_Raw.png'),
                         dpi=175, bbox_inches='tight')
 
@@ -356,7 +368,7 @@ def Run(test_dir,
         # Plot processed spectra
         fig_pro_dims = (int(np.floor(np.sqrt(n_tests)+0.5)), int(np.ceil(np.sqrt(n_tests))))
         fig_pro, axes_pro = plt.subplots(fig_pro_dims[0], fig_pro_dims[1],
-                                         figsize=(fig_pro_dims[0]*7.0, fig_pro_dims[0]*4.0),
+                                         figsize=(fig_pro_dims[0]*5.0, fig_pro_dims[0]*3.5),
                                          constrained_layout=True)
         pro_ypeak = np.max(np.concatenate((t_flux_peak_list, c_flux_peak_list)) / \
                            np.concatenate((pro_calib_list, pro_calib_list)))
@@ -373,6 +385,9 @@ def Run(test_dir,
                              0.9,
                              time.strftime('%d %b %Y, %H:%M', test_datetime_list[i].timetuple()),
                              transform=axes_pro.flatten()[i].transAxes)
+        for i in range(len(axes_raw.flatten())):
+            if i > (n_tests - 1):
+                axes_pro.flatten()[i].remove()
         fig_pro.savefig(os.path.join(test_dir, name+'_Spectra_Pro.png'),
                         dpi=175, bbox_inches='tight')
 
@@ -420,6 +435,7 @@ def Run(test_dir,
         # Calibrate integrated T fluxes and uncertainties using C values
         t_fluxes_int_calib = t_fluxes_int / c_fluxes_int
         t_fluxes_int_unc_calib = t_fluxes_int_unc / c_fluxes_int
+        t_fluxes_int_unc_calib = (t_fluxes_int_unc_calib**2.0 + 0.05**2.0)**0.5
 
         # Plot integrated strength versus time
         fig, ax = plt.subplots(1, 1, figsize=(8,6), constrained_layout=True)
