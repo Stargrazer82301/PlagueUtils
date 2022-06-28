@@ -10,7 +10,9 @@ The code is run using a single function, which has only one required argument, c
 
 `PlagueUtils.Run('/some/path/to/photo/folder/')`
 
-The function should be given the path to a directory that contains photographs of lateral flow tests, cropped to only show the test strip itself, oriented such tha that the control line is the uppermost of the two lines (with the line itself therefore being horizontal). See the photos provided in this repo for illustration.  
+The function should be given the path to a directory that contains photographs of lateral flow tests, cropped to only show the test strip itself, oriented such tha that the control line is the uppermost of the two lines (with the line itself therefore being horizontal). See this example (and the other the photos provided in this repo):
+
+![Example input image of a test strip](https://github.com/Stargrazer82301/PlagueUtils/blob/main/CJRC/CJRC_2022-06-22_07-20.jpg?raw=true)
 
 The individual photos should be `.jpg` files (not `.jpeg` files), and have file names of the format `NAME_YYYY-MM-DD_HH-MM.jpg`, where `NAME` is the same for all the files.  
 
