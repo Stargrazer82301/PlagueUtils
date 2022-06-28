@@ -10,19 +10,19 @@ The code is run using a single function, which has only one required argument, c
 
 `PlagueUtils.Run('/some/path/to/photo/folder/')`
 
-The function should be given the path to a directory that contains photographs of lateral flow tests, cropped to only show the test strip itself, oriented such tha that the control line is the uppermost of the two lines (with the line itself therefore being horizontal). See this example (and the other the photos provided in this repo):
+The function should be given the path to a directory that contains photographs of lateral flow tests, cropped to only show the test strip itself, oriented such that that the control line is above the control line (with the line itself therefore being horizontal). See this example (and the other the photos provided in this repo):
 
 ![Example input image of a test strip](https://github.com/Stargrazer82301/PlagueUtils/blob/main/CJRC/CJRC_2022-06-22_07-20.jpg?raw=true)
 
-The individual photos should be `.jpg` files (not `.jpeg` files), and have file names of the format `NAME_YYYY-MM-DD_HH-MM.jpg`, where `NAME` is the same for all the files.  
+The top and bottom 15% of each image are always assumed to be baseline only, to be sure to include enough empty space above and below the actual lines. The individual photos should be `.jpg` files (not `.jpeg` files), and have file names of the format `NAME_YYYY-MM-DD_HH-MM.jpg`, where `NAME` is the same for all the files.
 
-There are optional arguments to change which colour channel is used in the input jpgs (by default, green only is used), and to run in debug mode (that outputs a some intermediate plots)  
+There are optional arguments to change which colour channel is used in the input jpgs (by default, green only is used), and to run in debug mode (that outputs a some intermediate plots).
 
 An example directory called `CJRC` contains a set of example images, chronicling my own covid experience. You can therefore generate an example of the output plots by running the command:  
 
 `PlagueUtils.Run('CJRC/')  `
  
-The code uses the C (control) line as a "calibration source"; ie, it measures the strength of the T (test) line relative to the control line to estimate the viral load measured by a given test. This should help to account for differences between tests. It also uses crude implementations of various techniques used in analysis of astronomical spectra to, eg, account for the background "continuum" of the test strip. 
+The code uses the C (control) line as a "calibration source"; ie, it measures the strength of the T (test) line relative to the control line, to estimate the viral load measured by a given test. This should help to account for differences between tests. It also uses crude implementations of various techniques used in analysis of astronomical spectra to, eg, account for the background "continuum" of the test strip. 
 
 ## Example Outputs
 
@@ -35,11 +35,11 @@ The `Spectra_Pro` plot shows the processed versions of the spectra, with thebase
 
 ![Example of PlagueUtils processed spectra plot](https://raw.githubusercontent.com/Stargrazer82301/PlagueUtils/main/Readme_Images/CJRC_Spectra_Pro.png)
 
-Two plots of plagueiness ("viral load") against time out produced. The first one shows the *peak* of each T line, relative to the peak of the corresponding C lines, versus time:  
+Two plots of plagueiness ("viral load") against time out produced. The `Peak_vs_Time`  one shows the *peak* of each T line, relative to the peak of the corresponding C lines, versus time:  
 
 ![Example of PlagueUtils plot of peak plagueiness versus time](https://raw.githubusercontent.com/Stargrazer82301/PlagueUtils/main/Readme_Images/CJRC_Peak_vs_Time.png)
 
-The second time series plot shows the *integrated* strength of each T line, again calibrated relative to the integrated strengths of the corresponding C lines:
+The `Integrated_vs_Time` plot shows the *integrated* strength of each T line, again calibrated relative to the integrated strengths of the corresponding C lines:
 
 ![Example of PlagueUtils plot of peak plagueiness versus time](https://raw.githubusercontent.com/Stargrazer82301/PlagueUtils/main/Readme_Images/CJRC_Integrated_vs_Time.png)
 
