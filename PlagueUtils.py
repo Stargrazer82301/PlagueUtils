@@ -252,7 +252,7 @@ def Run(test_dir,
 
             # Create a smoothed spectra to use for line extraction
             filt_spec = specutils.manipulation.gaussian_smooth(test_spec, test_img.shape[0]*0.01)
-            filt_reg = specutils.SpectralRegion(10*u.pc, 90*u.pc)
+            filt_reg = specutils.SpectralRegion(20*u.pc, 85*u.pc)
             filt_spec = specutils.manipulation.extract_region(filt_spec, filt_reg)
 
             # Extract lines from filtered spectrum (computing fresh sigma clip on baseline-subtracted data)
@@ -269,7 +269,7 @@ def Run(test_dir,
 
 
 
-            # Extract region containing C line, using midpoint between C and T as bisector
+            # Extract region containing C line, using midpoint between C and T as bisectior
             bisect_wav = np.min(filt_lines['line_center']) + (0.5 * (np.max(filt_lines['line_center']) - np.min(filt_lines['line_center'])))
             c_proreg = specutils.SpectralRegion(0*u.pc, bisect_wav)
             c_prospec = specutils.manipulation.extract_region(test_spec, c_proreg)
@@ -298,44 +298,49 @@ def Run(test_dir,
 
 
 
-            # Extract region containing T line, again using midpoint between C and T as bisector
-            t_proreg = specutils.SpectralRegion(bisect_wav, 100*u.pc)
-            t_prospec = specutils.manipulation.extract_region(test_spec, t_proreg)
+            # Extract region containing T line, moving bisector if needed so it's not inside the C line
+            try:
+                bisect_wav = max(c_line.x_0+(5.0*c_line.fwhm), bisect_wav)
+                t_proreg = specutils.SpectralRegion(bisect_wav, 100*u.pc)
+                t_prospec = specutils.manipulation.extract_region(test_spec, t_proreg)
 
-            # Measure peak "flux" in T line region, and estimate uncertinty
-            t_flux_peak = t_prospec.max()
-            t_flux_peak_list.append(t_flux_peak.value)
-            t_flux_peak_unc = 10.0 * test_unc
-            t_flux_peak_unc_list.append(t_flux_peak_unc.value)
+                # Measure peak "flux" in T line region, and estimate uncertinty
+                t_flux_peak = t_prospec.max()
+                t_flux_peak_list.append(t_flux_peak.value)
+                t_flux_peak_unc = 10.0 * test_unc
+                t_flux_peak_unc_list.append(t_flux_peak_unc.value)
 
-            # Fit Gaussian to T line, to roughly estimate line width,
-            t_model = astropy.modeling.models.Lorentz1D(amplitude=t_flux_peak,
-                                                        x_0=np.max(filt_lines['line_center']),
-                                                        fwhm=2*u.pc)
-            t_line = specutils.fitting.fit_lines(t_prospec, t_model)
+                # Fit Gaussian to T line, to roughly estimate line width,
+                t_model = astropy.modeling.models.Lorentz1D(amplitude=t_flux_peak,
+                                                            x_0=np.max(filt_lines['line_center']),
+                                                            fwhm=2*u.pc)
+                t_line = specutils.fitting.fit_lines(t_prospec, t_model)
 
-            # Now define more specific region around T line, based on line width
-            t_proreg = specutils.SpectralRegion(t_line.x_0-(2.0*t_line.fwhm),
-                                                t_line.x_0+(2.0*t_line.fwhm))
+                # Now define more specific region around T line, based on line width
+                t_line_with_min = max(2*u.pc, 2.0*t_line.fwhm)
+                t_proreg = specutils.SpectralRegion(t_line.x_0-t_line_with_min,
+                                                    t_line.x_0+t_line_with_min)
 
-            # Measure integrated flux of T line, and estimate uncertinty
-            t_flux_int = specutils.analysis.line_flux(test_spec, regions=t_proreg)
-            t_flux_int_list.append(t_flux_int.value)
-            t_flux_int_unc = test_unc * (len(t_prospec.flux.data))**0.5
-            t_flux_int_unc_list.append(t_flux_int_unc.value)
+                # Measure integrated flux of T line, and estimate uncertinty
+                t_flux_int = specutils.analysis.line_flux(test_spec, regions=t_proreg)
+                t_flux_int_list.append(t_flux_int.value)
+                t_flux_int_unc = test_unc * (len(t_prospec.flux.data))**0.5
+                t_flux_int_unc_list.append(t_flux_int_unc.value)
 
 
 
-            # Calibrate spectrum
-            pro_spec = copy.deepcopy(test_spec)
-            pro_calib = c_flux_peak.value
-            pro_spec /= pro_calib
-            pro_calib_list.append(pro_calib)
+                # Calibrate spectrum
+                pro_spec = copy.deepcopy(test_spec)
+                pro_calib = c_flux_peak.value
+                pro_spec /= pro_calib
+                pro_calib_list.append(pro_calib)
 
-            # Put spectra in list
-            test_spec_list.append(test_spec)
-            raw_spec_list.append(raw_spec)
-            pro_spec_list.append(pro_spec)
+                # Put spectra in list
+                test_spec_list.append(test_spec)
+                raw_spec_list.append(raw_spec)
+                pro_spec_list.append(pro_spec)
+            except:
+                breakpoint()
 
 
 
@@ -422,7 +427,7 @@ def Run(test_dir,
         ax.set_ylabel('C-Calibrated Peak Plague Level', fontname='sans')
 
         # Format date & time tick labels
-        xlocator = matplotlib.dates.AutoDateLocator(minticks=6, maxticks=8)
+        xlocator = matplotlib.dates.AutoDateLocator(minticks=6, maxticks=20)
         xformatter = matplotlib.dates.ConciseDateFormatter(xlocator, tz=timezone)
         ax.xaxis.set_major_locator(xlocator)
         ax.xaxis.set_major_formatter(xformatter)
@@ -449,7 +454,7 @@ def Run(test_dir,
         ax.set_ylabel('C-Calibrated Integrated Plague Level', fontname='sans')
 
         # Format date & time tick labels for CO2 axis
-        xlocator = matplotlib.dates.AutoDateLocator(minticks=6, maxticks=8)
+        xlocator = matplotlib.dates.AutoDateLocator(minticks=6, maxticks=20)
         xformatter = matplotlib.dates.ConciseDateFormatter(xlocator, tz=timezone)
         ax.xaxis.set_major_locator(xlocator)
         ax.xaxis.set_major_formatter(xformatter)
@@ -460,6 +465,7 @@ def Run(test_dir,
 
         # Report completion and return
         print('Processing complete - get well soon!')
+        breakpoint()
         return
 
 
@@ -507,5 +513,5 @@ def SigmaClip(values, tolerance=0.001, median=False, sigma_thresh=3.0,):
 
 
 
-"""# Example use
-Run('CJRC/', green_only=True,  debug=False)"""
+# Example use
+Run('CJRC/', green_only=True,  debug=False)
