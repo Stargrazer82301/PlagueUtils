@@ -31,11 +31,11 @@ PlagueUtils outputs 4 plots (into the working directory from which you are runni
 ![Example of Plague
 Utils raw spectra plot](https://raw.githubusercontent.com/Stargrazer82301/PlagueUtils/main/Readme_Images/CJRC_Spectra_Raw.png)
 
-The `Spectra_Pro` plot shows the processed versions of the spectra, with thebaseline "continuum" subtracted:
+The `Spectra_Pro` plot shows the processed versions of the spectra, with the baseline "continuum" subtracted:
 
 ![Example of PlagueUtils processed spectra plot](https://raw.githubusercontent.com/Stargrazer82301/PlagueUtils/main/Readme_Images/CJRC_Spectra_Pro.png)
 
-Two plots of plagueiness ("viral load") against time out produced. The `Peak_vs_Time`  one shows the *peak* of each T line, relative to the peak of the corresponding C lines, versus time:  
+Two plots of plagueiness ("viral load") against time are produced. The `Peak_vs_Time`  one shows the *peak* of each T line, relative to the peak of the corresponding C lines, versus time:  
 
 ![Example of PlagueUtils plot of peak plagueiness versus time](https://raw.githubusercontent.com/Stargrazer82301/PlagueUtils/main/Readme_Images/CJRC_Peak_vs_Time.png)
 
