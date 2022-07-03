@@ -14,7 +14,7 @@ The function should be given the path to a directory that contains photographs o
 
 ![Example input image of a test strip](https://github.com/Stargrazer82301/PlagueUtils/blob/main/CJRC/CJRC_2022-06-22_07-20.jpg?raw=true)
 
-The top and bottom 15% of each image are always assumed to be baseline only, to be sure to include enough empty space above and below the actual lines. The individual photos should be `.jpg` files (not `.jpeg` files), and have file names of the format `NAME_YYYY-MM-DD_HH-MM.jpg`, where `NAME` is the same for all the files.
+The top and bottom 15% of each image are always assumed to be blank, to be sure to include enough empty background space above and below the actual lines to measure from. The individual photos should be `.jpg` files (not `.jpeg` files), and have file names of the format `NAME_YYYY-MM-DD_HH-MM.jpg`, where `NAME` is the same for all the files.
 
 There are optional arguments to change which colour channel is used in the input jpgs (by default, green only is used), and to run in debug mode (that outputs a some intermediate plots).
 
@@ -49,4 +49,4 @@ I consider the integrated plot to be the primary output. Although I'm pleasantly
 
 I wrote this code as an excuse to learn specutils, an astropy-affiliated Python package for analysing astronomical spectroscopy data. Any horrific code found herein should be ascribed to the fact I wrote it whilst I had the plague.
 
-Thank you to the Hagens, for not kicking me out when I tested positive 36 hours after arriving at their house, and taking such good care of me. And thank you to Em for still coming out to California, to hang out out intermediate distance for a frustrating long amount of time.
+Thank you to the Hagens, for not kicking me out when I tested positive 36 hours after arriving at their house, and taking such good care of me. And thank you to Em for still coming out to California, to hang out at intermediate distance for a frustratingly long amount of time.
