@@ -516,5 +516,5 @@ def SigmaClip(values, tolerance=0.001, median=False, sigma_thresh=3.0,):
 
 
 
-# Example use
-Run('CJRC/', green_only=True,  debug=False)
+"""# Example use
+Run('CJRC/', green_only=True,  debug=False)"""
