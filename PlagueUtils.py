@@ -300,7 +300,8 @@ def Run(test_dir,
 
             # Extract region containing T line, moving bisector if needed so it's not inside the C line
             try:
-                bisect_wav = max(c_line.x_0+(5.0*c_line.fwhm), bisect_wav)
+                if abs(c_line.x_0.quantity - bisect_wav) < 10*u.pc:
+                    bisect_wav = max(c_line.x_0+(5.0*c_line.fwhm), bisect_wav)
                 t_proreg = specutils.SpectralRegion(bisect_wav, 100*u.pc)
                 t_prospec = specutils.manipulation.extract_region(test_spec, t_proreg)
 
@@ -340,6 +341,7 @@ def Run(test_dir,
                 raw_spec_list.append(raw_spec)
                 pro_spec_list.append(pro_spec)
             except:
+                print('Failed to extract line')
                 breakpoint()
 
 
@@ -347,7 +349,8 @@ def Run(test_dir,
         # Plot raw spectra
         fig_raw_dims = (int(np.floor(np.sqrt(n_tests)+0.5)), int(np.ceil(np.sqrt(n_tests))))
         fig_raw, axes_raw = plt.subplots(fig_raw_dims[0], fig_raw_dims[1],
-                                         figsize=(fig_raw_dims[0]*5.0, fig_raw_dims[0]*3.5),
+                                         figsize=(max(8, fig_raw_dims[0]*5.0),
+                                                  max(6, fig_raw_dims[0]*3.5)),
                                          constrained_layout=True)
         raw_ypeak = np.concatenate((t_flux_peak_list, c_flux_peak_list)).max()
         for i in range(n_tests):
@@ -374,7 +377,8 @@ def Run(test_dir,
         # Plot processed spectra
         fig_pro_dims = (int(np.floor(np.sqrt(n_tests)+0.5)), int(np.ceil(np.sqrt(n_tests))))
         fig_pro, axes_pro = plt.subplots(fig_pro_dims[0], fig_pro_dims[1],
-                                         figsize=(fig_pro_dims[0]*5.0, fig_pro_dims[0]*3.5),
+                                         figsize=(max(8, fig_raw_dims[0]*5.0),
+                                                  max(6, fig_raw_dims[0]*3.5)),
                                          constrained_layout=True)
         pro_ypeak = np.max(np.concatenate((t_flux_peak_list, c_flux_peak_list)) / \
                            np.concatenate((pro_calib_list, pro_calib_list)))
@@ -512,5 +516,5 @@ def SigmaClip(values, tolerance=0.001, median=False, sigma_thresh=3.0,):
 
 
 
-"""# Example use
-Run('CJRC/', green_only=True,  debug=False)"""
+# Example use
+Run('FZ/', green_only=True,  debug=False)
