@@ -356,7 +356,7 @@ def Run(test_dir,
         for i in range(n_tests):
             raw_spec = raw_spec_list[i]
             axes_raw.flatten()[i].step(raw_spec.spectral_axis, raw_spec.flux)
-            if i >= (0.5 * n_tests):
+            if (n_tests - i) <= fig_raw_dims[1]:
                 axes_raw.flatten()[i].set_xlabel('Position', fontname='sans')
             if i % fig_raw_dims[1] == 0:
                 axes_raw.flatten()[i].set_ylabel('Strength', fontname='sans')
@@ -385,7 +385,7 @@ def Run(test_dir,
         for i in range(n_tests):
             pro_spec = pro_spec_list[i]
             axes_pro.flatten()[i].step(pro_spec.spectral_axis, pro_spec.flux)
-            if i >= (0.5 * n_tests):
+            if (n_tests - i) <= fig_raw_dims[1]:
                 axes_pro.flatten()[i].set_xlabel('Position', fontname='sans')
             if i % fig_pro_dims[1] == 0:
                 axes_pro.flatten()[i].set_ylabel('C-Normalised Strength', fontname='sans')
@@ -517,4 +517,4 @@ def SigmaClip(values, tolerance=0.001, median=False, sigma_thresh=3.0,):
 
 
 # Example use
-Run('FZ/', green_only=True,  debug=False)
+Run('CJRC/', green_only=True,  debug=False)
