@@ -435,6 +435,7 @@ def Run(test_dir,
         xformatter = matplotlib.dates.ConciseDateFormatter(xlocator, tz=timezone)
         ax.xaxis.set_major_locator(xlocator)
         ax.xaxis.set_major_formatter(xformatter)
+        ax.xaxis.set_tick_params(rotation=45)
 
         # Save plot
         fig.savefig(os.path.join(test_dir, name+'_Peak_vs_Time.png'),
@@ -457,11 +458,12 @@ def Run(test_dir,
         ax.set_xlabel('Time & Date', fontname='sans')
         ax.set_ylabel('C-Calibrated Integrated Plague Level', fontname='sans')
 
-        # Format date & time tick labels for CO2 axis
+        # Format date & time tick labels
         xlocator = matplotlib.dates.AutoDateLocator(minticks=6, maxticks=20)
         xformatter = matplotlib.dates.ConciseDateFormatter(xlocator, tz=timezone)
         ax.xaxis.set_major_locator(xlocator)
         ax.xaxis.set_major_formatter(xformatter)
+        ax.xaxis.set_tick_params(rotation=45)
 
         # Save plot
         fig.savefig(os.path.join(test_dir, name+'_Integrated_vs_Time.png'),
